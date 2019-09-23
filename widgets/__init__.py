@@ -2,4 +2,4 @@ NAME = "TestImportPackage"
 
 DESCRIPTION = "test to include package"
 
-ICON = "icons/test.svg"
+ICON = "icons/test.png"
