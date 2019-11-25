@@ -8,6 +8,7 @@ import scipy.sparse as sp
 import networkx as nx
 
 from Orange.misc import DistMatrix
+from Orange.data import Domain, StringVariable, Table
 from Orange.widgets import widget
 from Orange.widgets.widget import Input, Output
 from orangecontrib.network.network import Network
@@ -26,7 +27,7 @@ class OWNxGraphConverter(widget.OWWidget):
         graph = Input("Graph", nx.Graph)
 
     class Outputs:
-        network = Input("Network", Network)
+        network = Output("Network", Network)
         graph = Output("Graph", nx.Graph)
 
     def __init__(self):
@@ -46,12 +47,32 @@ class OWNxGraphConverter(widget.OWWidget):
             for neighbour in network.neighbours(i):
                 graph.add_edge(i, neighbour)
     
-        outGraph = graph
-        send_nxGraph()
+        self.outGraph = graph
+        self.send_nxGraph()
 
     @Inputs.graph
     def convet_to_Network(self, graph):
+        row_data = []
+        col_data = []
+        data_data = []
 
+        nb_data = len(graph)
+
+        for i in range(nb_data):
+            for j in list(graph[i].keys()):
+                data_data.append(1.0)
+                row_data.append(i)
+                col_data.append(j)
+
+        row = np.array(row_data)
+        col = np.array(col_data)
+        data = np.array(data_data)
+        a = sp.csr_matrix((data, (row, col)), shape=(150,150))
+
+        items = Table(Domain([], metas=[StringVariable('label')]), [[i] for i in range(len(graph))])
+
+        self.outNetwork = Network(items, a)
+        self.send_Network()
 
     def send_nxGraph(self):
         self.Outputs.graph.send(self.outGraph)
