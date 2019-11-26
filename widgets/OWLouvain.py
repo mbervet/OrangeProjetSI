@@ -1,6 +1,11 @@
+# Widget for convert graphs Network <--> networkx.Graph
+#
+# Author - Yanis Richard - Mael Bervet
+# Created on 2019-11-25
+
 import numpy
-import Orange.data
-from Orange.data import *
+
+from Orange.data import Domain, StringVariable, Table, DiscreteVariable
 from Orange.widgets import widget, gui
 from Orange.widgets.utils.signals import Input, Output
 
@@ -18,7 +23,7 @@ class OWDataSamplerA(widget.OWWidget):
         graph = Input("Graph", nx.Graph)
 
     class Outputs:
-        sample = Output("Sampled Data", Orange.data.Table)
+        sample = Output("Sampled Data", Table)
 
     want_main_area = False
 
