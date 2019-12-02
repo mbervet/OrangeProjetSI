@@ -62,7 +62,8 @@ class OWDistances(widget.OWWidget):
 
                 sum = (sqrt(sum_continuous_values) + sum_discrete_values) / nb_domain
                 distances[i].append(sum)
-                distances[j].append(sum)
+                if i != j:
+                    distances[j].append(sum)
 
         self.outDistances = DistMatrix(np.array(list(map(lambda x: [k for k in x], distances))))
         self.Outputs.distances.send(self.outDistances)
