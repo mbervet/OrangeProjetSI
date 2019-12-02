@@ -32,6 +32,12 @@ class OWDistances(widget.OWWidget):
     @Inputs.data
     def set_distances(self, data):
 
+        if data is not None:
+            self.outDistances = self.compute_distances(data)
+            self.Outputs.distances.send(self.outDistances)
+
+    def compute_distances(self, data):
+
         minima = []
         maxima = []
 
@@ -65,10 +71,7 @@ class OWDistances(widget.OWWidget):
                 if i != j:
                     distances[j].append(sum)
 
-        self.outDistances = DistMatrix(np.array(list(map(lambda x: [k for k in x], distances))))
-        self.Outputs.distances.send(self.outDistances)
-
-
+        return DistMatrix(np.array(list(map(lambda x: [k for k in x], distances))))
 
 
 
