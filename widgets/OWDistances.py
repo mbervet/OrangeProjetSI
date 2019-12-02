@@ -40,7 +40,7 @@ class OWDistances(widget.OWWidget):
         distances = [[] for _ in range(nb_data)]
 
         for domain in data.domain:
-            if(isinstance(domain, ContinuousVariable)):
+            if isinstance(domain, ContinuousVariable):
                 values = [row[domain] for row in data]
                 minima.append(min(values))
                 maxima.append(max(values))
