@@ -53,10 +53,9 @@ class OWSIRNGraph(widget.OWWidget):
         if data is not None:
 
             nb_data = len(data)
-            G = nx.Graph()
-
-            for i in range(nb_data):
-                G.add_node(i)
+            row_data = [] # first index of the points for each edges
+            col_data = [] # second index of the points for each edges
+            data_data = [] # edge weigth of each edges
 
             for i in range(nb_data):
                 for j in range(nb_data):
@@ -67,32 +66,23 @@ class OWSIRNGraph(widget.OWWidget):
                             add_edge = False
                         k += 1
                     if add_edge:
-                        G.add_edge(i, j)
+                        row_data.append(i)
+                        col_data.append(j)
+                        data_data.append(data[i][j])
 
-            sum = 0
-            for i in range(nb_data):
-                sum += len(G[i])
-
-            self.infoa.setText(
-                "Average edges per nodes : " + str(sum / nb_data))
-
-            # Transform Graph to network
-            row_data = []
-            col_data = []
-            data_data = []
-
-            for i in range(nb_data):
-                for j in list(G[i].keys()):
-                    data_data.append(data[i][j])
-                    row_data.append(i)
-                    col_data.append(j)
-
+            # transform to np array
             row = np.array(row_data)
             col = np.array(col_data)
             new_data = np.array(data_data)
-            new_network = sp.csr_matrix((new_data, (row, col)), shape=(150, 150))
 
-            items = Table(Domain([], metas=[StringVariable('label')]), [[i] for i in range(len(G))])
+            # create a csr matrix in order to create a Network
+            new_network = sp.csr_matrix((new_data, (row, col)), shape=(nb_data, nb_data))
+
+            # Create a table which contains each points of the network
+            items = Table(Domain([], metas=[StringVariable('label')]), [[i] for i in range(nb_data)])
+
+            self.infoa.setText(
+                "Average edges per nodes : " + str(len(row_data) / nb_data))
 
             # Send results
             self.Outputs.network.send(Network(items, new_network))

@@ -67,7 +67,7 @@ class OWNxGraphConverter(widget.OWWidget):
         row = np.array(row_data)
         col = np.array(col_data)
         data = np.array(data_data)
-        a = sp.csr_matrix((data, (row, col)), shape=(150,150))
+        a = sp.csr_matrix((data, (row, col)), shape=(nb_data,nb_data))
 
         items = Table(Domain([], metas=[StringVariable('label')]), [[i] for i in range(len(graph))])
 

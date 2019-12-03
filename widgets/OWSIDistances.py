@@ -42,6 +42,7 @@ class OWDistances(widget.OWWidget):
         nb_domain = len(data.domain)
         distances = [[] for _ in range(nb_data)]
 
+        # look for the biggest and the lowest value of each continuous column
         min_max = []
         for i in range(len(data.domain)):
             if isinstance(data.domain[i], ContinuousVariable):
@@ -52,17 +53,19 @@ class OWDistances(widget.OWWidget):
                     if data[j][data.domain[i]] > min_max[-1][1]:
                         min_max[-1][1] = data[j][data.domain[i]]
 
+        # Compute the difference between the biggest and lowest value for each continuous columns
         diff_extrema = [extrema[1] - extrema[0] for extrema in min_max]
 
+        # Compute the distances between each data
         for i in range(nb_data):
             for j in range(i, nb_data):
 
-                sum_continuous_values = 0
-                sum_discrete_values = 0
+                sum_continuous_values = 0 # Sum of the squares of the difference of two data for each continuous columns
+                sum_discrete_values = 0 # Sum of distances of two points for each discrete columns (0 if equals, 1 else)
 
                 for k in range(len(data.domain)):
                     if isinstance(data.domain[k], ContinuousVariable):
-                        sum_continuous_values = ((data[i][data.domain[k]] - data[j][data.domain[k]]) / (diff_extrema[k]))**2
+                        sum_continuous_values += ((data[i][data.domain[k]] - data[j][data.domain[k]]) / (diff_extrema[k]))**2
                     else:
                         if data[i][data.domain[k]] != data[j][data.domain[k]]:
                             sum_discrete_values += 1
