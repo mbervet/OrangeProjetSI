@@ -38,32 +38,33 @@ class OWDistances(widget.OWWidget):
 
     def compute_distances(self, data):
 
-        minima = []
-        maxima = []
-
         nb_data = len(data)
         nb_domain = len(data.domain)
         distances = [[] for _ in range(nb_data)]
 
-        for domain in data.domain:
-            if isinstance(domain, ContinuousVariable):
-                values = [row[domain] for row in data]
-                minima.append(min(values))
-                maxima.append(max(values))
+        min_max = []
+        for i in range(len(data.domain)):
+            if isinstance(data.domain[i], ContinuousVariable):
+                min_max.append([data[0][data.domain[i]], data[1][data.domain[i]]])
+                for j in range(1, nb_data):
+                    if data[j][data.domain[i]] < min_max[-1][0]:
+                        min_max[-1][0] = data[j][data.domain[i]]
+                    if data[j][data.domain[i]] > min_max[-1][1]:
+                        min_max[-1][1] = data[j][data.domain[i]]
+
+        diff_extrema = [extrema[1] - extrema[0] for extrema in min_max]
 
         for i in range(nb_data):
             for j in range(i, nb_data):
 
                 sum_continuous_values = 0
                 sum_discrete_values = 0
-                ite_min_max = 0
 
-                for domain in data.domain:
-                    if isinstance(domain, ContinuousVariable):
-                        sum_continuous_values = ((data[i][domain] - data[j][domain]) / (maxima[ite_min_max] - minima[ite_min_max]))**2
-                        ite_min_max += 1
+                for k in range(len(data.domain)):
+                    if isinstance(data.domain[k], ContinuousVariable):
+                        sum_continuous_values = ((data[i][data.domain[k]] - data[j][data.domain[k]]) / (diff_extrema[k]))**2
                     else:
-                        if data[i][domain] != data[j][domain]:
+                        if data[i][data.domain[k]] != data[j][data.domain[k]]:
                             sum_discrete_values += 1
 
                 sum = (sqrt(sum_continuous_values) + sum_discrete_values) / nb_domain
@@ -71,7 +72,4 @@ class OWDistances(widget.OWWidget):
                 if i != j:
                     distances[j].append(sum)
 
-        return DistMatrix(np.array(list(map(lambda x: [k for k in x], distances))))
-
-
-
+        return DistMatrix(np.array(distances))
