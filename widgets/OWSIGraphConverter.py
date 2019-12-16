@@ -30,6 +30,11 @@ class OWNxGraphConverter(widget.OWWidget):
         network = Output("Network", Network)
         graph = Output("Graph", nx.Graph)
 
+    class Warning(widget.OWWidget.Warning):
+        input_graph_is_none = Msg('Input graph is none')
+        input_network_is_none = Msg('Input network is none')
+
+
     def __init__(self):
         super().__init__()
 
@@ -38,41 +43,47 @@ class OWNxGraphConverter(widget.OWWidget):
 
     @Inputs.network
     def convert_to_nxGraph(self, network):
-        graph = nx.Graph()
+        if network is None:
+            self.Warning.input_network_is_none()
+        else:
+            graph = nx.Graph()
 
-        for i in range(network.number_of_nodes()):
-            graph.add_node(i, name=i)
+            for i in range(network.number_of_nodes()):
+                graph.add_node(i, name=i)
     
-        for i in range(network.number_of_nodes()):
-            for neighbour in network.neighbours(i):
-                graph.add_edge(i, neighbour)
+            for i in range(network.number_of_nodes()):
+                for neighbour in network.neighbours(i):
+                    graph.add_edge(i, neighbour)
     
-        self.outGraph = graph
-        self.send_nxGraph()
+            self.outGraph = graph
+            self.send_nxGraph()
 
     @Inputs.graph
     def convet_to_Network(self, graph):
-        row_data = []
-        col_data = []
-        data_data = []
+        if graph is None:
+            self.Warning.input_graph_is_none()
+        else:
+            row_data = []
+            col_data = []
+            data_data = []
 
-        nb_data = len(graph)
+            nb_data = len(graph)
 
-        for i in range(nb_data):
-            for j in list(graph[i].keys()):
-                data_data.append(1.0)
-                row_data.append(i)
-                col_data.append(j)
+            for i in range(nb_data):
+                for j in list(graph[i].keys()):
+                    data_data.append(1.0)
+                    row_data.append(i)
+                    col_data.append(j)
 
-        row = np.array(row_data)
-        col = np.array(col_data)
-        data = np.array(data_data)
-        a = sp.csr_matrix((data, (row, col)), shape=(nb_data,nb_data))
+            row = np.array(row_data)
+            col = np.array(col_data)
+            data = np.array(data_data)
+            a = sp.csr_matrix((data, (row, col)), shape=(nb_data,nb_data))
 
-        items = Table(Domain([], metas=[StringVariable('label')]), [[i] for i in range(len(graph))])
+            items = Table(Domain([], metas=[StringVariable('label')]), [[i] for i in range(len(graph))])
 
-        self.outNetwork = Network(items, a)
-        self.send_Network()
+            self.outNetwork = Network(items, a)
+            self.send_Network()
 
     def send_nxGraph(self):
         self.Outputs.graph.send(self.outGraph)
