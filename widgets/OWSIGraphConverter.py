@@ -9,7 +9,7 @@ import networkx as nx
 
 from Orange.misc import DistMatrix
 from Orange.data import Domain, StringVariable, Table
-from Orange.widgets import widget
+from Orange.widgets import gui, widget
 from Orange.widgets.widget import Input, Output
 from orangecontrib.network.network import Network
 
