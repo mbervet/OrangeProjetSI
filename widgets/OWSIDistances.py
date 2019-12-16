@@ -8,7 +8,7 @@ import numpy as np
 from math import *
 from Orange.data import Domain, StringVariable, Table, ContinuousVariable, DiscreteVariable
 from Orange.widgets import widget, gui
-from Orange.widgets.utils.signals import Input, Output
+from Orange.widgets.widget import Input, Output, Msg
 from Orange.misc import DistMatrix
 
 class OWDistances(widget.OWWidget):
@@ -24,8 +24,8 @@ class OWDistances(widget.OWWidget):
     class Outputs:
         distances = Output("Distances", DistMatrix)
 
-    class Warning(widget.OWWidget.Warning):
-        input_data_is_none = widget.Msg('Input graph is none')
+    class Error(widget.OWWidget.Error):
+        input_data_is_none = Msg('Input graph is none')
 
     def __init__(self):
         super().__init__()
@@ -34,9 +34,10 @@ class OWDistances(widget.OWWidget):
 
     @Inputs.data
     def set_distances(self, data):
+        self.Error.clear()
 
         if data is None:
-            self.Warning.input_data_is_none()
+            self.Error.input_data_is_none()
         else:
             self.outDistances = self.compute_distances(data)
             self.Outputs.distances.send(self.outDistances)

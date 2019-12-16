@@ -10,7 +10,7 @@ import networkx as nx
 from Orange.misc import DistMatrix
 from Orange.data import Domain, StringVariable, Table
 from Orange.widgets import gui, widget
-from Orange.widgets.widget import Input, Output
+from Orange.widgets.widget import Input, Output, Msg
 from orangecontrib.network.network import Network
 
 class OWNxGraphConverter(widget.OWWidget):
@@ -32,9 +32,9 @@ class OWNxGraphConverter(widget.OWWidget):
 
     resizing_enabled = False
 
-    class Warning(widget.OWWidget.Warning):
-        input_graph_is_none = widget.Msg('Input graph is none')
-        input_network_is_none = widget.Msg('Input network is none')
+    class Error(widget.OWWidget.Error):
+        input_graph_is_none = Msg('Input graph is none')
+        input_network_is_none = Msg('Input network is none')
 
 
     def __init__(self):
@@ -50,7 +50,7 @@ class OWNxGraphConverter(widget.OWWidget):
     @Inputs.network
     def convert_to_nxGraph(self, network):
         if network is None:
-            self.Warning.input_network_is_none()
+            self.Error.input_network_is_none()
         else:
             graph = nx.Graph()
 
@@ -66,8 +66,11 @@ class OWNxGraphConverter(widget.OWWidget):
 
     @Inputs.graph
     def convet_to_Network(self, graph):
+        self.Error.clear()
+
         if graph is None:
-            self.Warning.input_graph_is_none()
+            self.Error.input_graph_is_none()
+            self.infoa.setText("Nothing on input yet, waiting to get something.")
         else:
             row_data = []
             col_data = []

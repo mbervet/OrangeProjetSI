@@ -12,7 +12,7 @@ from AnyQt.QtCore import QLineF, QSize
 from Orange.data import Domain, StringVariable, Table
 from Orange.misc import DistMatrix
 from Orange.widgets import gui, widget, settings
-from Orange.widgets.widget import Input, Output
+from Orange.widgets.widget import Input, Output, Msg
 from orangecontrib.network.network import Network
 
 import pyqtgraph as pg # lib for graphs, used for Histogram
@@ -34,10 +34,10 @@ class OWSIRNGraph(widget.OWWidget):
     resizing_enabled = False
 
     class Warning(widget.OWWidget.Warning):
-        large_number_of_nodes = widget.Msg('Large number of nodes/edges; performance will be hindered')
+        large_number_of_nodes = Msg('Large number of nodes/edges; performance will be hindered')
 
     class Error(widget.OWWidget.Error):
-        number_of_edges = widget.Msg('Estimated number of edges is too high ({})')
+        number_of_edges = Msg('Estimated number of edges is too high ({})')
 
     def __init__(self):
         super().__init__()
