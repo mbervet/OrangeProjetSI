@@ -30,9 +30,11 @@ class OWNxGraphConverter(widget.OWWidget):
         network = Output("Network", Network)
         graph = Output("Graph", nx.Graph)
 
+    resizing_enabled = False
+
     class Warning(widget.OWWidget.Warning):
-        input_graph_is_none = Msg('Input graph is none')
-        input_network_is_none = Msg('Input network is none')
+        input_graph_is_none = widget.Msg('Input graph is none')
+        input_network_is_none = widget.Msg('Input network is none')
 
 
     def __init__(self):
@@ -40,6 +42,10 @@ class OWNxGraphConverter(widget.OWWidget):
 
         self.outGraph = None
         self.outNetwork = None
+
+        box = gui.widgetBox(self.controlArea, "Info")
+        self.infoa = gui.widgetLabel(
+            box, "Nothing on input yet, waiting to get something.")
 
     @Inputs.network
     def convert_to_nxGraph(self, network):
@@ -86,9 +92,11 @@ class OWNxGraphConverter(widget.OWWidget):
             self.send_Network()
 
     def send_nxGraph(self):
+        self.infoa.setText("Network converted into graph")
         self.Outputs.graph.send(self.outGraph)
 
     def send_Network(self):
+        self.infoa.setText("Graph converted into network")
         self.Outputs.network.send(self.outNetwork)
 
 
