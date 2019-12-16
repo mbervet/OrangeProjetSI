@@ -24,6 +24,9 @@ class OWDistances(widget.OWWidget):
     class Outputs:
         distances = Output("Distances", DistMatrix)
 
+    class Warning(widget.OWWidget.Warning):
+        input_data_is_none = Msg('Input graph is none')
+
     def __init__(self):
         super().__init__()
 
@@ -32,7 +35,9 @@ class OWDistances(widget.OWWidget):
     @Inputs.data
     def set_distances(self, data):
 
-        if data is not None:
+        if data is None:
+            self.Warning.input_data_is_none()
+        else:
             self.outDistances = self.compute_distances(data)
             self.Outputs.distances.send(self.outDistances)
 
