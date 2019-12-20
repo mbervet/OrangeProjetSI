@@ -51,7 +51,6 @@ class OWNxGraphConverter(widget.OWWidget):
     def convert_to_nxGraph(self, network):
         if network is None:
             self.Error.input_network_is_none()
-            return;
         else:
             self.Error.clear()
             graph = nx.Graph()
