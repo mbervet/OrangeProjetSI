@@ -51,27 +51,28 @@ class OWNxGraphConverter(widget.OWWidget):
     def convert_to_nxGraph(self, network):
         if network is None:
             self.Error.input_network_is_none()
+            return;
         else:
+            self.Error.clear()
             graph = nx.Graph()
 
             for i in range(network.number_of_nodes()):
                 graph.add_node(i, name=i)
-    
+
             for i in range(network.number_of_nodes()):
                 for neighbour in network.neighbours(i):
                     graph.add_edge(i, neighbour)
-    
+
             self.outGraph = graph
             self.send_nxGraph()
 
     @Inputs.graph
     def convet_to_Network(self, graph):
-        self.Error.clear()
-
         if graph is None:
             self.Error.input_graph_is_none()
             self.infoa.setText("Nothing on input yet, waiting to get something.")
         else:
+            self.Error.clear()
             row_data = []
             col_data = []
             data_data = []
