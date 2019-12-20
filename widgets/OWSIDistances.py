@@ -68,13 +68,11 @@ class OWDistances(widget.OWWidget):
 
                 sum_continuous_values = 0 # Sum of the squares of the difference of two data for each continuous columns
                 sum_discrete_values = 0 # Sum of distances of two points for each discrete columns (0 if equals, 1 else)
-                
-                ite_extrema = 0
 
                 for k in range(nb_domain):
                     if isinstance(data.domain[k], ContinuousVariable):
-                        sum_continuous_values += ((data[i][data.domain[k]] - data[j][data.domain[k]]) / (diff_extrema[ite_extrema]))**2
-                        ite_extrema += 1
+                        if diff_extrema[k] != 0:
+                            sum_continuous_values += ((data[i][data.domain[k]] - data[j][data.domain[k]]) / (diff_extrema[k]))**2
                     else:
                         if data[i][data.domain[k]] != data[j][data.domain[k]]:
                             sum_discrete_values += 1
