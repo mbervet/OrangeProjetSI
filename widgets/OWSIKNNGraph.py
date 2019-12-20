@@ -25,8 +25,7 @@ class OWSIKNNGraph(widget.OWWidget):
         network = Output("Network", Network)
         distances = Output("Distances", DistMatrix)
 
-        
-    include_knn = settings.Setting(False)
+
     kNN = settings.Setting(2)
 
 
@@ -41,7 +40,7 @@ class OWSIKNNGraph(widget.OWWidget):
 
     class Error(widget.OWWidget.Error):
         number_of_edges = Msg('Estimated number of edges is too high ({})')
-        input_distances_is_none = Msg('Input graph is none')
+        input_distances_is_none = Msg('Input distances is none')
 
 
     def __init__(self):
@@ -60,21 +59,12 @@ class OWSIKNNGraph(widget.OWWidget):
         self.infob = gui.widgetLabel(boxInfo, '')
         self.infoc = gui.widgetLabel(boxInfo, '')
 
-        gui.rubber(self.controlArea)
-
-        self.resize(600, 400)
-
 
     def add_knn_control(self):
         hbox = gui.widgetBox(self.controlArea, orientation='horizontal')
-        knn_cb = gui.checkBox(hbox, self, 'include_knn',
-                              label='Include closest neighbors',
-                              callback=self.generateGraph)
         knn = gui.spin(hbox, self, "kNN", 1, 1000, 1,
-                       orientation='horizontal',
-                       callback=self.generateGraph, callbackOnReturn=1, controlWidth=60)
-        knn_cb.disables = [knn]
-        knn_cb.makeConsistent()
+                       label="Nearest neighbor", orientation='horizontal',
+                       callback=self.generateGraph, callbackOnReturn=1)
 
 
     @Inputs.distances
@@ -83,8 +73,10 @@ class OWSIKNNGraph(widget.OWWidget):
             self.Error.input_distances_is_none()
         else:
             self.graphMatrix = matrix
+            if self.graphMatrix.row_items is None:
+                self.graphMatrix.row_items = list(range(self.graphMatrix.shape[0]))
+
             self.generateGraph()
-            self.send_network()
         
         self.send_matrix()
 
@@ -116,7 +108,7 @@ class OWSIKNNGraph(widget.OWWidget):
             if matrix is not None and matrix.row_items is not None:
                 row_items = self.graphMatrix.row_items
                 if isinstance(row_items, Table):
-                    if matrix.axis == 1:
+                    if self.graphMatrix.axis == 1:
                         items = row_items
                     else:
                         items = [[v.name] for v in row_items.domain.attributes]
@@ -136,16 +128,31 @@ class OWSIKNNGraph(widget.OWWidget):
             if self.kNN >= self.graphMatrix.shape[0]:
                 self.Warning.kNN_too_large(self.graphMatrix.shape[0] - 1)
 
-            mask = self.graphMatrix
-            if self.include_knn:
-                mask |= mask.argsort() < self.kNN
-            weights = matrix[mask]
-            edges = sp.csr_matrix((weights, mask.nonzero()))
+            nb_data = len(matrix)
+            row_index = []
+            col_index = []
+            distances_data = []
+
+            for i in range(nb_data):
+                distances = []
+                for j in range(nb_data):
+                    distances.append((self.graphMatrix[i][j], j))
+                distances.sort()
+                for k in range(self.kNN):
+                    row_index.append(i)
+                    col_index.append(distances[k][1])
+                    distances_data.append(distances[k][0])
+
+            row = np.array(row_index)
+            col = np.array(col_index)
+            weights = np.array(distances_data)
+
+            edges = sp.csr_matrix((weights, (row, col)))
             graph = Network(items, edges)
 
-        self.graph = graph
+            self.graph = graph
 
-        if graph is None:
+        if self.graph is None:
             self.pconnected = 0
             self.nedges = 0
         else:
@@ -164,6 +171,8 @@ class OWSIKNNGraph(widget.OWWidget):
         self.Warning.large_number_of_nodes.clear()
         if self.pconnected > 1000 or self.nedges > 2000:
             self.Warning.large_number_of_nodes()
+        
+        self.send_network()
 
     def send_matrix(self):
         self.Outputs.distances.send(self.graphMatrix)

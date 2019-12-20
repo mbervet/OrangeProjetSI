@@ -74,6 +74,7 @@ class OWNxEpsilonGraph(widget.OWWidget):
                                         0, float('inf'), 0.001, decimals=3,
                                         label='Epsilon',
                                         callback=self.changeUpperSpin,
+                                        callbackOnReturn=1,
                                         keyboardTracking=False,
                                         controlWidth=60)
         self.histogram.region.sigRegionChangeFinished.connect(self.spinboxFromHistogramRegion)
